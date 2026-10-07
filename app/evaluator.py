@@ -1,6 +1,10 @@
 from collections import Counter
 from .models import Evidence
 
+REQUIRED_AGENT_COVERAGE = 4
+MIN_CONFIDENCE = 0.70
+MIN_AGREEMENT = 0.75
+
 class EvidenceEvaluator:
     def evaluate(self, evidence: list[Evidence]) -> dict:
         if not evidence:
@@ -10,9 +14,13 @@ class EvidenceEvaluator:
         domains = Counter(e.agent for e in evidence)
         sources = Counter(e.source for e in evidence)
 
-        coverage = min(1.0, len(domains) / 4)
+        coverage = min(1.0, len(domains) / REQUIRED_AGENT_COVERAGE)
         agreement = max(sources.values()) / len(evidence)
-        ready = confidence >= 0.70 and coverage >= 0.75 and agreement >= 0.75
+        ready = (
+            confidence >= MIN_CONFIDENCE
+            and coverage >= 0.75
+            and agreement >= MIN_AGREEMENT
+        )
 
         return {
             "coverage": round(coverage, 3),
