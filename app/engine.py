@@ -1,7 +1,7 @@
 import logging
 from .agents import AGENTS
 from .config import settings
-from .evaluator import EvidenceEvaluator
+from .evaluator import EvidenceEvaluator, deduplicate_evidence
 from .models import ResearchReport
 
 log = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ class ResearchEngine:
         return [
             f"Define scope for: {q}",
             "Collect specialist evidence",
-            "Evaluate evidence coverage and confidence",
+            "Deduplicate claims and evaluate evidence quality",
             "Cross-check claims",
             "Synthesize findings",
         ]
@@ -20,25 +20,19 @@ class ResearchEngine:
         evidence = []
         for agent in AGENTS[: settings.max_agents]:
             evidence.extend(agent.research(q))
-        evidence = evidence[: settings.max_evidence]
+        evidence = deduplicate_evidence(evidence[: settings.max_evidence])
 
         quality = EvidenceEvaluator().evaluate(evidence)
         status = "completed" if quality["status"] == "ready" else "partial"
         synthesis = " ".join(e.claim for e in evidence)
 
-        log.info(
-            "research_completed",
-            extra={
-                "agents": len(AGENTS[: settings.max_agents]),
-                "evidence": len(evidence),
-                "quality": quality,
-                "status": status,
-            },
-        )
+        log.info("research_completed", extra={
+            "agents": len(AGENTS[: settings.max_agents]),
+            "evidence": len(evidence),
+            "quality": quality,
+            "status": status,
+        })
         return ResearchReport(
-            question=q,
-            plan=self.plan(q),
-            evidence=evidence,
-            synthesis=synthesis,
-            status=status,
+            question=q, plan=self.plan(q), evidence=evidence,
+            synthesis=synthesis, status=status,
         )
