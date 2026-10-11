@@ -1,0 +1,37 @@
+[
+  {
+    "case": "independent_support",
+    "expected": "supported",
+    "sources": [
+      "source_a",
+      "source_b"
+    ],
+    "same_underlying_source": false
+  },
+  {
+    "case": "syndicated_duplicate",
+    "expected": "deduplicate",
+    "sources": [
+      "source_a",
+      "source_a_copy"
+    ],
+    "same_underlying_source": true
+  },
+  {
+    "case": "conflicting_claims",
+    "expected": "review",
+    "sources": [
+      "source_a",
+      "source_b"
+    ],
+    "same_underlying_source": false
+  },
+  {
+    "case": "single_weak_source",
+    "expected": "review",
+    "sources": [
+      "source_c"
+    ],
+    "same_underlying_source": false
+  }
+]
